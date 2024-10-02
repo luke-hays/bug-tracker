@@ -1,2 +1,19 @@
 # bug-tracker
-Monorepo Bug Tracking App
+Bug Tracking App
+
+## Structure
+
+Not bothering with any framework, will just use the standard library. Go's template engine will be used to handle layouts and components built with HTMX.
+
+## Links
+
+### Generic Go and HTMX
+
+https://go.dev/doc/
+https://htmx.org/
+https://gowebexamples.com/
+
+### Package Documentation
+
+https://pkg.go.dev/html/template
+https://pkg.go.dev/net/http
