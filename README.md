@@ -3,7 +3,7 @@ Bug Tracking App
 
 ## Structure
 
-Not bothering with any framework, will just use the standard library. Go's template engine will be used to handle layouts and components built with HTMX.
+Not bothering with any framework, will just use the standard library. Go's template engine will be used to handle layouts and pages built with HTMX.
 
 ## Links
 
@@ -17,3 +17,4 @@ https://gowebexamples.com/
 
 https://pkg.go.dev/html/template
 https://pkg.go.dev/net/http
+https://gorilla.github.io/
