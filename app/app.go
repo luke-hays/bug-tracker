@@ -1,13 +1,33 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"html/template"
+	"log"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/mux"
+	"github.com/jackc/pgx/v5"
 )
 
 func main() {
+	// Incredibly messy logic to just to test connecting to a db
+	dbURL := os.Getenv("DATABASE_URL")
+	conn, err := pgx.Connect(context.Background(), dbURL)
+	if err != nil {
+		log.Fatalf("Unable to connect to database: %v\n", err)
+	}
+
+	defer conn.Close(context.Background())
+
+	err = conn.Ping(context.Background())
+	if err != nil {
+		log.Fatalf("Unable to ping the database: %v\n", err)
+	}
+	fmt.Println("Connected to the database successfully!")
+
 	router := mux.NewRouter()
 
 	// Temporary solution just to test composing a base layout, a page, and multiple components together
