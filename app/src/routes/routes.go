@@ -9,8 +9,8 @@ import (
 )
 
 func RegisterRoutes(router *mux.Router, dbContext *db.DatabaseContext) {
-	router.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
-		handlers.LoginHandler(w, r)
+	router.HandleFunc("/signin", func(w http.ResponseWriter, r *http.Request) {
+		handlers.SignInHandler(w, r)
 	})
 
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {

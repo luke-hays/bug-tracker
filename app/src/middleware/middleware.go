@@ -14,10 +14,10 @@ func Logger(next http.Handler) http.Handler {
 
 func Authenticator(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/login" {
-			http.Redirect(w, r, "/login", http.StatusSeeOther)
-			return
-		}
+		// if r.URL.Path != "/signin" {
+		// 	http.Redirect(w, r, "/signin", http.StatusSeeOther)
+		// 	return
+		// }
 
 		next.ServeHTTP(w, r)
 	})

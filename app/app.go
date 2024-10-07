@@ -32,7 +32,7 @@ func main() {
 	router.Use(middleware.Authenticator)
 	router.Use(middleware.Logger)
 
-	// Need to strip the static prefix from the path so that we ca serve static assets
+	// Need to strip the static prefix from the path so that we can serve static assets
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("assets"))))
 
 	http.ListenAndServe(":8080", router)

@@ -11,7 +11,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request, dbContext *db.DatabaseC
 	tmpl.Execute(w, nil)
 }
 
-func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("src/templates/layouts/base.html", "src/templates/pages/home.html", "src/components/example-btn.html"))
+func SignInHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles("src/templates/layouts/base.html", "src/templates/pages/signin.html"))
 	tmpl.Execute(w, nil)
 }
