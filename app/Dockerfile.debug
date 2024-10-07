@@ -1,0 +1,26 @@
+# Use the same Go version as in your main Dockerfile
+FROM golang:1.23
+
+WORKDIR /usr/src/app
+
+# Pre-copy/cache go.mod for downloading dependencies
+COPY go.mod go.sum ./
+RUN go mod download && go mod verify
+
+# Install Goose for database migrations
+RUN go install github.com/pressly/goose/v3/cmd/goose@latest
+
+# Copy all files to the container
+COPY . .
+
+# Build the application with debugging flags
+RUN go build -gcflags="all=-N -l" -o /usr/local/bin/app .
+
+# Expose debugging port for Delve (default is 40000)
+EXPOSE 40000
+
+# Install Delve for debugging
+RUN go install github.com/go-delve/delve/cmd/dlv@latest
+
+# Set the entrypoint to start Delve debugger and Goose migrations
+ENTRYPOINT ["bash", "-c", "goose -dir ./sql postgres $DATABASE_URL up && dlv exec /usr/local/bin/app --headless --listen=:40000 --api-version=2 --accept-multiclient"]

@@ -29,6 +29,7 @@ func main() {
 
 	routes.RegisterRoutes(router, dbContext)
 
+	router.Use(middleware.Authenticator)
 	router.Use(middleware.Logger)
 
 	// Need to strip the static prefix from the path so that we ca serve static assets
