@@ -2,40 +2,34 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"html/template"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/gorilla/mux"
-	"github.com/jackc/pgx/v5"
+
+	"app/src/db"
+	"app/src/middleware"
+	"app/src/routes"
 )
 
 func main() {
-	// Incredibly messy logic to just to test connecting to a db
-	dbURL := os.Getenv("DATABASE_URL")
-	conn, err := pgx.Connect(context.Background(), dbURL)
-	if err != nil {
-		log.Fatalf("Unable to connect to database: %v\n", err)
+	dbContext, error := db.Init()
+
+	if error != nil {
+		log.Fatalf("Unable to connect to database: %v\n", error)
 	}
 
-	defer conn.Close(context.Background())
+	pingErr := dbContext.Connection.Ping(context.Background())
 
-	err = conn.Ping(context.Background())
-	if err != nil {
-		log.Fatalf("Unable to ping the database: %v\n", err)
+	if pingErr != nil {
+		log.Fatalf("Pinging database failed: %v\n", error)
 	}
-	fmt.Println("Connected to the database successfully!")
 
 	router := mux.NewRouter()
 
-	// Temporary solution just to test composing a base layout, a page, and multiple components together
-	tmpl := template.Must(template.ParseFiles("templates/layouts/base.html", "templates/pages/home.html", "components/example-btn.html"))
+	routes.RegisterRoutes(router, dbContext)
 
-	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		tmpl.Execute(w, nil)
-	})
+	router.Use(middleware.Logger)
 
 	// Need to strip the static prefix from the path so that we ca serve static assets
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("assets"))))
