@@ -12,4 +12,4 @@ RUN go install github.com/pressly/goose/v3/cmd/goose@latest
 COPY . .
 RUN go build -v -o /usr/local/bin/app .
 
-ENTRYPOINT ["bash", "-c", "goose -dir ./db postgres $DATABASE_URL up && app"]
+ENTRYPOINT ["bash", "-c", "goose -dir ./sql postgres $DATABASE_URL up && app"]
