@@ -60,15 +60,31 @@ CREATE TABLE BugsProducts(
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE Bugs;
+-- Drop foreign key constraints in BugsProducts table
+ALTER TABLE BugsProducts DROP CONSTRAINT bug_id;
+ALTER TABLE BugsProducts DROP CONSTRAINT product_id;
 
-DROP TABLE Comments;
+-- Drop foreign key constraints in Tags table
+ALTER TABLE Tags DROP CONSTRAINT bug_id;
 
-DROP TABLE Screenshots;
+-- Drop foreign key constraints in Screenshots table
+ALTER TABLE Screenshots DROP CONSTRAINT bug_id;
 
-DROP TABLE Tags;
+-- Drop foreign key constraints in Comments table
+ALTER TABLE Comments DROP CONSTRAINT bug_id;
+ALTER TABLE Comments DROP CONSTRAINT account_id;
 
-DROP TABLE Products;
+-- Drop foreign key constraints in Bugs table
+ALTER TABLE Bugs DROP CONSTRAINT reported_by;
+ALTER TABLE Bugs DROP CONSTRAINT assigned_to;
+ALTER TABLE Bugs DROP CONSTRAINT verified_by;
+ALTER TABLE Bugs DROP CONSTRAINT status;
 
+-- Now drop tables in reverse order of dependencies
 DROP TABLE BugsProducts;
+DROP TABLE Products;
+DROP TABLE Tags;
+DROP TABLE Screenshots;
+DROP TABLE Comments;
+DROP TABLE Bugs;
 -- +goose StatementEnd
