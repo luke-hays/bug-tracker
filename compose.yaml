@@ -2,8 +2,10 @@ services:
   app:
     build:
       context: ./app
+      dockerfile: Dockerfile  # Point to Dockerfile.debug for debugging
     ports:
       - 127.0.0.1:8080:8080
+      # - 127.0.0.1:40000:40000        # Port for Delve debugger
     environment:
       - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
     depends_on:
