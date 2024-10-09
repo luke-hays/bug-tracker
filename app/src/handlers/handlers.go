@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func HomeHandler(w http.ResponseWriter, r *http.Request, dbContext *db.DatabaseContext) {
+func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("src/templates/layouts/base.html", "src/templates/pages/home.html", "src/components/example-btn.html"))
 	tmpl.Execute(w, nil)
 }
@@ -14,4 +14,8 @@ func HomeHandler(w http.ResponseWriter, r *http.Request, dbContext *db.DatabaseC
 func SignInHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("src/templates/layouts/base.html", "src/templates/pages/signin.html"))
 	tmpl.Execute(w, nil)
+}
+
+func AuthenticateHandler(w http.ResponseWriter, r *http.Request, dbContext *db.DatabaseContext) {
+	w.WriteHeader(http.StatusOK)
 }
