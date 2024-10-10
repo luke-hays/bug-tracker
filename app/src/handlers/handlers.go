@@ -17,5 +17,11 @@ func SignInHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func AuthenticateHandler(w http.ResponseWriter, r *http.Request, dbContext *db.DatabaseContext) {
+	err := r.ParseForm()
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+	}
+
 	w.WriteHeader(http.StatusOK)
 }
