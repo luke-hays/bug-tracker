@@ -1,4 +1,2 @@
-POST http://localhost:8080/api/authenticate HTTP/2.0
+POST http://localhost:8080/api/authenticate?username=test-user&password=password HTTP/2.0
 content-type: application/json
-
-{}
