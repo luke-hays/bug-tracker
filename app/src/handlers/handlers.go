@@ -139,5 +139,15 @@ func AuthenticateHandler(w http.ResponseWriter, r *http.Request, dbContext *db.D
 		return
 	}
 
+	cookie := &http.Cookie{
+		Name:  "session",
+		Value: newSessionId,
+
+		// Secure
+		HttpOnly: true,
+		// SameSite
+	}
+
+	http.SetCookie(w, cookie)
 	w.WriteHeader(http.StatusOK)
 }
