@@ -1,13 +1,13 @@
 {{define "body"}}
-<form class="signin-form">
+<form class="signin-form" hx-post="/api/authenticate">
   <div>
     <label for="username">Username</label>
-    <input type="username" id="username" name="username"/>  
+    <input type="username" id="username" name="username" required/>  
   </div>
 
   <div>
     <label for="password">Password</label>
-    <input type="password" id="password" name="password"/>  
+    <input type="password" id="password" name="password" minlength="8" maxlength="64" required>  
   </div>
 
   <div class="signin-submit">

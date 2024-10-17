@@ -20,6 +20,7 @@ Database is Postgres and pgx is driver used to connect to it. This also uses goo
 - https://pkg.go.dev/html/template
 - https://pkg.go.dev/net/http
 - https://pkg.go.dev/crypto/sha256
+- https://github.com/alexedwards/argon2id
 - https://gorilla.github.io/
 - https://github.com/jackc/pgx
 
