@@ -4,7 +4,7 @@ CREATE TABLE Sessions (
   session_id CHAR(64) PRIMARY KEY,
   account_id BIGINT NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  expires_at  TIMESTAMP NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
   FOREIGN KEY (account_id) REFERENCES Accounts(account_id)
 );
 

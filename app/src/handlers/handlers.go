@@ -3,12 +3,17 @@ package handlers
 import (
 	"app/src/db"
 	"context"
+	"crypto/rand"
+	"encoding/base64"
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
+	"time"
 	"unicode/utf8"
 
 	"github.com/alexedwards/argon2id"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
@@ -57,15 +62,17 @@ func AuthenticateHandler(w http.ResponseWriter, r *http.Request, dbContext *db.D
 
 	row := dbContext.Connection.QueryRow(
 		context.Background(),
-		"SELECT password_hash FROM Accounts WHERE account_name=$1",
+		"SELECT account_id, password_hash, session_id FROM Accounts WHERE account_name=$1",
 		username)
 
+	var accountId int
 	var hash string
+	var sessionId pgtype.Text
 
-	scanError := row.Scan(&hash)
+	scanError := row.Scan(&accountId, &hash, &sessionId)
 
 	if scanError != nil {
-		fmt.Println("No results found")
+		log.Fatal(scanError)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -81,6 +88,54 @@ func AuthenticateHandler(w http.ResponseWriter, r *http.Request, dbContext *db.D
 	if !match {
 		fmt.Println("Password hashes do not match")
 		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// 48 bytes = 64 base64 characters
+	randomBytes := make([]byte, 48)
+	_, sessionIdError := rand.Read(randomBytes)
+
+	if sessionIdError != nil {
+		fmt.Println("Unable to generate session id")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	newSessionId := base64.URLEncoding.EncodeToString(randomBytes)
+	expirationDate := time.Now().AddDate(0, 0, 1)
+
+	tx, err := dbContext.Connection.Begin((context.Background()))
+
+	if err != nil {
+		fmt.Println("Unable to begin session creation transaction")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Printf("session id length: %d\n", utf8.RuneCountInString(newSessionId))
+
+	defer tx.Rollback(context.Background())
+
+	tx.Exec(
+		context.Background(),
+		"INSERT INTO Sessions (session_id, account_id, expires_at) VALUES ($1, $2, $3)",
+		newSessionId, accountId, expirationDate)
+
+	tx.Exec(
+		context.Background(),
+		"UPDATE Accounts SET session_id = $1 WHERE account_id = $2",
+		newSessionId, accountId)
+
+	tx.Exec(
+		context.Background(),
+		"DELETE FROM Sessions WHERE session_id = $1",
+		sessionId)
+
+	err = tx.Commit(context.Background())
+
+	if err != nil {
+		fmt.Println("Unable to commit session transaction")
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
