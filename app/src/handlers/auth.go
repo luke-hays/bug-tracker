@@ -4,7 +4,6 @@ import (
 	"app/src/db"
 	helpers "app/src/utils"
 	"context"
-	"fmt"
 	"net/http"
 	"time"
 	"unicode/utf8"
@@ -17,8 +16,7 @@ func AuthenticateHandler(w http.ResponseWriter, r *http.Request, dbContext *db.D
 	err := r.ParseForm()
 
 	if err != nil {
-		fmt.Println("Error parsing form data")
-		w.WriteHeader(http.StatusInternalServerError)
+		helpers.WriteAndLogHeaderStatus(w, http.StatusInternalServerError, "Error parsing form data")
 		return
 	}
 
@@ -26,24 +24,21 @@ func AuthenticateHandler(w http.ResponseWriter, r *http.Request, dbContext *db.D
 	password := r.FormValue("password")
 
 	if password == "" || username == "" {
-		fmt.Println("Missing sign in info")
-		w.WriteHeader(http.StatusBadRequest)
+		helpers.WriteAndLogHeaderStatus(w, http.StatusBadRequest, "Missing sign in info")
 		return
 	}
 
 	usernameLength := utf8.RuneCountInString(username)
 
 	if usernameLength < 3 || usernameLength > 20 {
-		fmt.Println("Username length requirements not met")
-		w.WriteHeader(http.StatusBadRequest)
+		helpers.WriteAndLogHeaderStatus(w, http.StatusBadRequest, "Username length requirements not met")
 		return
 	}
 
 	passwordLength := utf8.RuneCountInString(password)
 
 	if passwordLength < 8 || passwordLength > 64 {
-		fmt.Println("Password length requirements not met")
-		w.WriteHeader(http.StatusBadRequest)
+		helpers.WriteAndLogHeaderStatus(w, http.StatusBadRequest, "Password length requirements not met")
 		return
 	}
 
@@ -59,30 +54,26 @@ func AuthenticateHandler(w http.ResponseWriter, r *http.Request, dbContext *db.D
 	scanErr := row.Scan(&accountId, &hash, &sessionId)
 
 	if scanErr != nil {
-		fmt.Println("Querying account info failed")
-		w.WriteHeader(http.StatusInternalServerError)
+		helpers.WriteAndLogHeaderStatus(w, http.StatusInternalServerError, "Querying account info failed")
 		return
 	}
 
 	match, err := argon2id.ComparePasswordAndHash(password, hash)
 
 	if err != nil {
-		fmt.Println("Unable to hash potential password")
-		w.WriteHeader(http.StatusInternalServerError)
+		helpers.WriteAndLogHeaderStatus(w, http.StatusInternalServerError, "Compare hash failed")
 		return
 	}
 
 	if !match {
-		fmt.Println("Password hashes do not match")
-		w.WriteHeader(http.StatusBadRequest)
+		helpers.WriteAndLogHeaderStatus(w, http.StatusBadRequest, "Password hashes do not match")
 		return
 	}
 
 	newSessionId, err := helpers.GenerateBase64RandomId(48)
 
 	if err != nil {
-		fmt.Println("Unable to generate session id")
-		w.WriteHeader(http.StatusInternalServerError)
+		helpers.WriteAndLogHeaderStatus(w, http.StatusInternalServerError, "Unable to generate session id")
 		return
 	}
 
@@ -91,8 +82,7 @@ func AuthenticateHandler(w http.ResponseWriter, r *http.Request, dbContext *db.D
 	tx, err := dbContext.Connection.Begin((context.Background()))
 
 	if err != nil {
-		fmt.Println("Unable to begin session creation transaction")
-		w.WriteHeader(http.StatusInternalServerError)
+		helpers.WriteAndLogHeaderStatus(w, http.StatusInternalServerError, "Unable to begin session creation transaction")
 		return
 	}
 
@@ -116,8 +106,7 @@ func AuthenticateHandler(w http.ResponseWriter, r *http.Request, dbContext *db.D
 	err = tx.Commit(context.Background())
 
 	if err != nil {
-		fmt.Println("Unable to commit session transaction")
-		w.WriteHeader(http.StatusInternalServerError)
+		helpers.WriteAndLogHeaderStatus(w, http.StatusInternalServerError, "Unable to commit session transaction")
 		return
 	}
 

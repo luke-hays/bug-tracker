@@ -3,6 +3,7 @@ package helpers
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"fmt"
 	"net/http"
 )
 
@@ -23,4 +24,9 @@ func GenerateBase64RandomId(byteNum int) (string, error) {
 	}
 
 	return base64.URLEncoding.EncodeToString(randomBytes), nil
+}
+
+func WriteAndLogHeaderStatus(w http.ResponseWriter, status int, message string) {
+	fmt.Println(message)
+	w.WriteHeader(status)
 }
