@@ -9,7 +9,17 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func RegisterRoutes(router *mux.Router, dbContext *db.DatabaseContext) {
+func registerSecureRoutes(router *mux.Router, dbContext *db.DatabaseContext) {
+	secureRoutes := router.NewRoute().Subrouter()
+
+	secureRoutes.Use(middleware.Authenticator)
+
+	secureRoutes.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		handlers.HomeHandler(w, r, dbContext)
+	}).Methods("GET")
+}
+
+func registerPublicRoutes(router *mux.Router, dbContext *db.DatabaseContext) {
 	router.HandleFunc("/api/authenticate", func(w http.ResponseWriter, r *http.Request) {
 		handlers.AuthenticateHandler(w, r, dbContext)
 	}).Methods("POST")
@@ -17,12 +27,12 @@ func RegisterRoutes(router *mux.Router, dbContext *db.DatabaseContext) {
 	router.HandleFunc("/signin", func(w http.ResponseWriter, r *http.Request) {
 		handlers.SignInHandler(w, r)
 	}).Methods("GET")
+}
 
-	sr := router.NewRoute().Subrouter()
+func RegisterRoutes(router *mux.Router, dbContext *db.DatabaseContext) {
+	// Middleware used by all routes
+	router.Use(middleware.Logger)
 
-	sr.Use(middleware.Authenticator)
-
-	sr.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		handlers.HomeHandler(w, r)
-	}).Methods("GET")
+	registerSecureRoutes(router, dbContext)
+	registerPublicRoutes(router, dbContext)
 }

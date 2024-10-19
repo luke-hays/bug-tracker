@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	helpers "app/src/utils"
 	"fmt"
 	"net/http"
 )
@@ -14,9 +15,7 @@ func Logger(next http.Handler) http.Handler {
 
 func Authenticator(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Check for the session cookie
-		sessionCookie, err := r.Cookie("session")
-		if err != nil || sessionCookie == nil {
+		if helpers.RequestHasValidSession(r) {
 			// If the cookie is missing, redirect to /signin
 			http.Redirect(w, r, "/signin", http.StatusSeeOther)
 			return
