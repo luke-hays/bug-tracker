@@ -28,8 +28,6 @@ func main() {
 	router := mux.NewRouter()
 
 	routes.RegisterRoutes(router, dbContext)
-
-	router.Use(middleware.Authenticator)
 	router.Use(middleware.Logger)
 
 	// Need to strip the static prefix from the path so that we can serve static assets

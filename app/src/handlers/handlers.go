@@ -7,7 +7,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"html/template"
-	"log"
 	"net/http"
 	"time"
 	"unicode/utf8"
@@ -72,7 +71,6 @@ func AuthenticateHandler(w http.ResponseWriter, r *http.Request, dbContext *db.D
 	scanError := row.Scan(&accountId, &hash, &sessionId)
 
 	if scanError != nil {
-		log.Fatal(scanError)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -142,6 +140,7 @@ func AuthenticateHandler(w http.ResponseWriter, r *http.Request, dbContext *db.D
 	cookie := &http.Cookie{
 		Name:  "session",
 		Value: newSessionId,
+		Path:  "/",
 
 		// Secure
 		HttpOnly: true,
@@ -149,5 +148,6 @@ func AuthenticateHandler(w http.ResponseWriter, r *http.Request, dbContext *db.D
 	}
 
 	http.SetCookie(w, cookie)
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusCreated)
+	w.Header().Set("Location", "/")
 }

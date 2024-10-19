@@ -3,6 +3,7 @@ package routes
 import (
 	"app/src/db"
 	"app/src/handlers"
+	"app/src/middleware"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -17,7 +18,11 @@ func RegisterRoutes(router *mux.Router, dbContext *db.DatabaseContext) {
 		handlers.SignInHandler(w, r)
 	}).Methods("GET")
 
-	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	sr := router.NewRoute().Subrouter()
+
+	sr.Use(middleware.Authenticator)
+
+	sr.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		handlers.HomeHandler(w, r)
 	}).Methods("GET")
 }

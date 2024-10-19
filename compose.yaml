@@ -12,11 +12,11 @@ services:
       - db
     volumes:
       - ./app:/app
-    develop:
-      watch:
-        - action: rebuild
-          path: ./app
-          target: ./app
+    # develop:
+    #   watch:
+    #     - action: rebuild
+    #       path: ./app
+    #       target: ./app
 
   db:
     image: postgres:15
