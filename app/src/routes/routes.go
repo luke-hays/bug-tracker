@@ -17,6 +17,22 @@ func registerSecureRoutes(router *mux.Router, dbContext *db.DatabaseContext) {
 	secureRoutes.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		handlers.HomeHandler(w, r, dbContext)
 	}).Methods("GET")
+
+	secureRoutes.HandleFunc("/bugs", func(w http.ResponseWriter, r *http.Request) {
+		handlers.GetBugs(w, r, dbContext)
+	}).Methods("GET")
+
+	secureRoutes.HandleFunc("/bugs", func(w http.ResponseWriter, r *http.Request) {
+		handlers.CreateBug(w, r, dbContext)
+	}).Methods("POST")
+
+	secureRoutes.HandleFunc("/bugs/{id}", func(w http.ResponseWriter, r *http.Request) {
+		handlers.GetBug(w, r, dbContext)
+	}).Methods("GET")
+
+	secureRoutes.HandleFunc("/bugs/{id}", func(w http.ResponseWriter, r *http.Request) {
+		handlers.UpdateBug(w, r, dbContext)
+	}).Methods("PUT")
 }
 
 func registerPublicRoutes(router *mux.Router, dbContext *db.DatabaseContext) {
