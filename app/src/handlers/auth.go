@@ -79,33 +79,28 @@ func AuthenticateHandler(w http.ResponseWriter, r *http.Request, dbContext *db.D
 
 	expirationDate := time.Now().AddDate(0, 0, 1)
 
-	tx, err := dbContext.Connection.Begin((context.Background()))
-
-	if err != nil {
-		helpers.WriteAndLogHeaderStatus(w, http.StatusInternalServerError, "Unable to begin session creation transaction")
-		return
+	insertNewSession := helpers.ParameterizedQuery{
+		Sql:    "INSERT INTO Sessions (session_id, account_id, expires_at) VALUES ($1, $2, $3)",
+		Params: []any{newSessionId, accountId, expirationDate},
 	}
 
-	defer tx.Rollback(context.Background())
+	updateAccount := helpers.ParameterizedQuery{
+		Sql:    "UPDATE Accounts SET session_id = $1 WHERE account_id = $2",
+		Params: []any{newSessionId, accountId},
+	}
 
-	tx.Exec(
-		context.Background(),
-		"INSERT INTO Sessions (session_id, account_id, expires_at) VALUES ($1, $2, $3)",
-		newSessionId, accountId, expirationDate)
+	deleteOldSession := helpers.ParameterizedQuery{
+		Sql:    "DELETE FROM Sessions WHERE session_id = $1",
+		Params: []any{sessionId},
+	}
 
-	tx.Exec(
-		context.Background(),
-		"UPDATE Accounts SET session_id = $1 WHERE account_id = $2",
-		newSessionId, accountId)
+	transactionErr := helpers.RunTransaction(dbContext, []*helpers.ParameterizedQuery{
+		&insertNewSession,
+		&updateAccount,
+		&deleteOldSession,
+	})
 
-	tx.Exec(
-		context.Background(),
-		"DELETE FROM Sessions WHERE session_id = $1",
-		sessionId)
-
-	err = tx.Commit(context.Background())
-
-	if err != nil {
+	if transactionErr != nil {
 		helpers.WriteAndLogHeaderStatus(w, http.StatusInternalServerError, "Unable to commit session transaction")
 		return
 	}
