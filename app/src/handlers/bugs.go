@@ -2,20 +2,56 @@ package handlers
 
 import (
 	"app/src/db"
+	helpers "app/src/utils"
+	"context"
 	"net/http"
+	"time"
 )
 
-func CreateBug(w http.ResponseWriter, r *http.Request, dbContext *db.DatabaseContext) {
-	// Get account id from session id
-	// Date reported is current timestampe
-	// Reported by is an existing account id
-	// Bug should start on new as default - need to add statuses in bug status
-	// Optionally start with
-	// summary
-	// description
-	// assigned to
-	// priority
-	// hours
+func CreateBug(w http.ResponseWriter, r *http.Request, dbContext *db.DatabaseContext, sessionId string) {
+	err := r.ParseForm()
+
+	if err != nil {
+		helpers.WriteAndLogHeaderStatus(w, http.StatusInternalServerError, "Error parsing form data")
+		return
+	}
+
+	dateReported := time.Now()
+	summary := r.FormValue("summary")
+	description := r.FormValue("description")
+	assignedTo := r.FormValue("assigned_to")
+	status := "NEW"
+	priority := r.FormValue("priority")
+	hours := r.FormValue("hours")
+
+	session := dbContext.Connection.QueryRow(
+		context.Background(),
+		"SELECT account_id FROM Sessions WHERE session_id = $1;",
+		sessionId,
+	)
+
+	var reportedBy int
+
+	scanErr := session.Scan(&reportedBy)
+
+	if scanErr != nil {
+		helpers.WriteAndLogHeaderStatus(w, http.StatusInternalServerError, "Unable to create bug - cannot find account id")
+		return
+	}
+
+	insertNewBug := helpers.ParameterizedQuery{
+		Sql:    "INSERT INTO Bugs (date_reported, summary, description, resolution, reported_by, assigned_to, status, priority, hours) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);",
+		Params: []any{dateReported, summary, description, reportedBy, assignedTo, status, priority, hours},
+	}
+
+	transactionErr := helpers.RunTransaction(dbContext, []*helpers.ParameterizedQuery{&insertNewBug})
+
+	if transactionErr != nil {
+		helpers.WriteAndLogHeaderStatus(w, http.StatusInternalServerError, "Unable to commit transaction for inserting a new bug")
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
 }
 
 func UpdateBug(w http.ResponseWriter, r *http.Request, dbContext *db.DatabaseContext) {
