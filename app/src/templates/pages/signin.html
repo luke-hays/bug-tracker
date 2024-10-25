@@ -13,7 +13,22 @@
   <div class="signin-submit">
     <button>Sign in</button>
   </div>
+
+  <div id="#auth-server-error"></div>
+  </div>
 </form>
+
+<script>
+  htmx.on("htmx:afterRequest", function(e) {
+    const status = e.detail.xhr.status;
+
+    if (status >= 500) {
+      console.log('Internal Server Error');
+    } else if (status >= 400) {
+      console.log('User Error');
+    }
+  });
+</script>
 {{end}}
 
 {{define "styles"}}

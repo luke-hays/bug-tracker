@@ -3,12 +3,39 @@ package routes
 import (
 	"app/src/db"
 	"app/src/handlers"
+	"app/src/middleware"
 	"net/http"
 
 	"github.com/gorilla/mux"
 )
 
-func RegisterRoutes(router *mux.Router, dbContext *db.DatabaseContext) {
+func registerSecureRoutes(router *mux.Router, dbContext *db.DatabaseContext) {
+	secureRoutes := router.NewRoute().Subrouter()
+
+	secureRoutes.Use(middleware.Authenticator)
+
+	secureRoutes.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		handlers.HomeHandler(w, r, dbContext)
+	}).Methods("GET")
+
+	secureRoutes.HandleFunc("/bugs", func(w http.ResponseWriter, r *http.Request) {
+		handlers.GetBugs(w, r, dbContext)
+	}).Methods("GET")
+
+	secureRoutes.HandleFunc("/bugs", func(w http.ResponseWriter, r *http.Request) {
+		handlers.CreateBug(w, r, dbContext)
+	}).Methods("POST")
+
+	secureRoutes.HandleFunc("/bugs/{id}", func(w http.ResponseWriter, r *http.Request) {
+		handlers.GetBug(w, r, dbContext)
+	}).Methods("GET")
+
+	secureRoutes.HandleFunc("/bugs/{id}", func(w http.ResponseWriter, r *http.Request) {
+		handlers.UpdateBug(w, r, dbContext)
+	}).Methods("PUT")
+}
+
+func registerPublicRoutes(router *mux.Router, dbContext *db.DatabaseContext) {
 	router.HandleFunc("/api/authenticate", func(w http.ResponseWriter, r *http.Request) {
 		handlers.AuthenticateHandler(w, r, dbContext)
 	}).Methods("POST")
@@ -16,8 +43,12 @@ func RegisterRoutes(router *mux.Router, dbContext *db.DatabaseContext) {
 	router.HandleFunc("/signin", func(w http.ResponseWriter, r *http.Request) {
 		handlers.SignInHandler(w, r)
 	}).Methods("GET")
+}
 
-	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		handlers.HomeHandler(w, r)
-	}).Methods("GET")
+func RegisterRoutes(router *mux.Router, dbContext *db.DatabaseContext) {
+	// Middleware used by all routes
+	router.Use(middleware.Logger)
+
+	registerSecureRoutes(router, dbContext)
+	registerPublicRoutes(router, dbContext)
 }
