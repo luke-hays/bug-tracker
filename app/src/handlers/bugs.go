@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"net/http"
 	"time"
 
@@ -130,16 +131,8 @@ func GetBugs(w http.ResponseWriter, r *http.Request, dbContext *db.DatabaseConte
 		return
 	}
 
-	encodedBugs, encodingErr := json.Marshal(bugs)
-
-	if encodingErr != nil {
-		helpers.WriteAndLogHeaderStatus(w, http.StatusInternalServerError, "Unable to encode bugs")
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(encodedBugs)
+	tmpl := template.Must(template.ParseFiles("src/templates/layouts/base.html", "src/templates/pages/bugs.html"))
+	tmpl.Execute(w, bugs)
 }
 
 func GetBug(w http.ResponseWriter, r *http.Request, dbContext *db.DatabaseContext, bugId string) {

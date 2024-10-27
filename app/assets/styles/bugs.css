@@ -1,0 +1,31 @@
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.bugs {
+  list-style: none;
+  padding: 0;
+  max-width: 80rem;
+  width: 100%;
+  min-width: 30rem;
+}
+
+.bug {
+  border-right: 1px solid black;
+  border-left: 1px solid black;
+  border-bottom: 1px solid black;
+  padding: 1rem;
+}
+
+.bug:first-child {
+  border-top: 1px solid black;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.bug:last-child {
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}

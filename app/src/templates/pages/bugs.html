@@ -1,0 +1,56 @@
+{{define "body"}}
+  <ul class="bugs">
+    {{ range . }}
+      <li class="bug">
+        <div>
+          <div>
+            {{ .Status }}
+            {{ .BugId }}
+            {{ .Summary }}
+          </div>
+          <div>
+            Date Reported: {{ .DateReported }}
+          </div>
+        </div>
+        <div>
+          <div>
+            Description:
+            {{ .Description }}
+          </div>
+          <div>
+            Resolution:
+            {{ .Resolution }}
+          </div>
+          <div>
+            <div>
+              Reported By:
+              {{ .ReportedBy }}
+            </div>
+            <div>
+              Assigned To:
+              {{ .AssignedTo }}
+            </div>
+            <div>
+              Verified By:
+              {{ .VerifiedBy }}
+            </div>
+          </div>
+        </div>
+        <div>      
+          <div>
+            Priority:
+            {{ .Priority }}
+          </div>    
+          <div>
+            Hours:
+            {{ .Hours }}
+          </div>
+        </div>
+      </li>
+    {{end}}
+  </ul>
+{{end}}
+
+{{define "styles"}}
+  <link rel="stylesheet" href="/static/styles/bugs.css"  type="text/css">
+{{end}}
