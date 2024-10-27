@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net/http"
+	"strconv"
 )
 
 type ParameterizedQuery struct {
@@ -66,4 +67,30 @@ func RunTransaction(dbContext *db.DatabaseContext, queries []*ParameterizedQuery
 	}
 
 	return nil
+}
+
+func ParseInt(val string) *int {
+	var result *int
+
+	if val != "" {
+		convertedVal, err := strconv.Atoi(val)
+		if err != nil {
+			result = &convertedVal
+		}
+	}
+
+	return result
+}
+
+func ParseFloat64(val string) *float64 {
+	var result *float64
+
+	if val != "" {
+		convertedVal, err := strconv.ParseFloat(val, 64)
+		if err != nil {
+			result = &convertedVal
+		}
+	}
+
+	return result
 }

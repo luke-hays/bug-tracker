@@ -27,7 +27,9 @@ func registerSecureRoutes(router *mux.Router, dbContext *db.DatabaseContext) {
 	}).Methods("POST")
 
 	secureRoutes.HandleFunc("/bugs/{id}", func(w http.ResponseWriter, r *http.Request) {
-		handlers.GetBug(w, r, dbContext)
+		vars := mux.Vars(r)
+		bugId := vars["id"]
+		handlers.GetBug(w, r, dbContext, bugId)
 	}).Methods("GET")
 
 	secureRoutes.HandleFunc("/bugs/{id}", func(w http.ResponseWriter, r *http.Request) {
