@@ -35,6 +35,10 @@ func registerSecureRoutes(router *mux.Router, dbContext *db.DatabaseContext) {
 	secureRoutes.HandleFunc("/bugs/{id}", func(w http.ResponseWriter, r *http.Request) {
 		handlers.UpdateBug(w, r, dbContext)
 	}).Methods("PUT")
+
+	secureRoutes.HandleFunc("/comments", func(w http.ResponseWriter, r *http.Request) {
+		handlers.CreateComment(w, r, dbContext)
+	})
 }
 
 func registerPublicRoutes(router *mux.Router, dbContext *db.DatabaseContext) {
