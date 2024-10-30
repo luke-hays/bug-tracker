@@ -10,6 +10,14 @@ import (
 	"strconv"
 )
 
+type DbContextKey string
+type AccountIdKey string
+
+type ExtendedRequest struct {
+	Request   *http.Request
+	AccountId *string
+}
+
 type ParameterizedQuery struct {
 	Sql    string
 	Params []any

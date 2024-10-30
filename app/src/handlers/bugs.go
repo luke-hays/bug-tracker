@@ -31,7 +31,7 @@ func CreateBug(w http.ResponseWriter, r *http.Request, dbContext *db.DatabaseCon
 	sessionId, err := r.Cookie("session")
 
 	if err != nil {
-		helpers.WriteAndLogHeaderStatus(w, http.StatusInternalServerError, "Unable to authorize session id")
+		helpers.WriteAndLogHeaderStatus(w, http.StatusUnauthorized, "Unable to authorize session id")
 		return
 	}
 

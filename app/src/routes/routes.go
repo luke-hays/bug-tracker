@@ -12,7 +12,7 @@ import (
 func registerSecureRoutes(router *mux.Router, dbContext *db.DatabaseContext) {
 	secureRoutes := router.NewRoute().Subrouter()
 
-	secureRoutes.Use(middleware.Authenticator)
+	secureRoutes.Use(middleware.Authenticator(dbContext))
 
 	secureRoutes.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		handlers.HomeHandler(w, r, dbContext)
@@ -38,7 +38,7 @@ func registerSecureRoutes(router *mux.Router, dbContext *db.DatabaseContext) {
 
 	secureRoutes.HandleFunc("/comments", func(w http.ResponseWriter, r *http.Request) {
 		handlers.CreateComment(w, r, dbContext)
-	})
+	}).Methods("POST")
 }
 
 func registerPublicRoutes(router *mux.Router, dbContext *db.DatabaseContext) {
