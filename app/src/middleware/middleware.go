@@ -37,7 +37,7 @@ func Authenticator(dbContext *db.DatabaseContext) mux.MiddlewareFunc {
 				scanErr := session.Scan(&accountId)
 
 				if scanErr != nil {
-					fmt.Println("unable to authenticate user scan error")
+					fmt.Printf("%s\n", scanErr.Error())
 					http.Redirect(w, r, "/signin", http.StatusSeeOther)
 					return
 				}

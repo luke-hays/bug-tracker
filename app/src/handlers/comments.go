@@ -3,7 +3,6 @@ package handlers
 import (
 	"app/src/db"
 	helpers "app/src/utils"
-	"context"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -37,14 +36,18 @@ func CreateComment(w http.ResponseWriter, r *http.Request, dbContext *db.Databas
 
 	fmt.Printf("%d, %d, %s, %s\n", bugIdNum, author, commentDate, comment)
 
-	_, insertErr := dbContext.Connection.Query(
-		context.Background(),
-		"INSERT INTO Comments (bug_id, author, comment_date, comment) VALUES ($1, $2, $3, $4)",
-		bugIdNum, author, commentDate, comment,
+	insertComment := helpers.ParameterizedQuery{
+		Sql:    "INSERT INTO Comments (bug_id, author, comment_date, comment) VALUES ($1, $2, $3, $4);",
+		Params: []any{bugIdNum, author, commentDate, comment},
+	}
+
+	transactionErr := helpers.RunTransaction(
+		dbContext,
+		[]*helpers.ParameterizedQuery{&insertComment},
 	)
 
-	if insertErr != nil {
-		helpers.WriteAndLogHeaderStatus(w, http.StatusInternalServerError, "Unable to insert new comment")
+	if transactionErr != nil {
+		helpers.WriteAndLogHeaderStatus(w, http.StatusInternalServerError, "Unable to commit transaction for inserting a new comment")
 		return
 	}
 

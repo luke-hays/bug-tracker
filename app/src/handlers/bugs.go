@@ -114,8 +114,6 @@ func UpdateBug(w http.ResponseWriter, r *http.Request, dbContext *db.DatabaseCon
 }
 
 func GetBugs(w http.ResponseWriter, r *http.Request, dbContext *db.DatabaseContext) {
-	// For now encode as json and send it back
-	// also probably want to paginate
 	rows, err := dbContext.Connection.Query(context.Background(), "SELECT * FROM Bugs")
 
 	if err != nil {
