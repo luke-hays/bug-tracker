@@ -5,17 +5,17 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type DatabaseContext struct {
-	Connection *pgx.Conn
+	Connection *pgxpool.Pool
 }
 
 func Init() (*DatabaseContext, error) {
 	dbUrl := os.Getenv("DATABASE_URL")
 
-	conn, err := pgx.Connect(context.Background(), dbUrl)
+	conn, err := pgxpool.New(context.Background(), dbUrl)
 
 	if err != nil {
 		return nil, err
