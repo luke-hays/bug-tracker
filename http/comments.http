@@ -1,3 +1,7 @@
 ###
 # Add a comment
 POST http://localhost:8080/comments?bug_id=2&comment=test%20is%20another%20test
+
+###
+# Get comments for a bug
+GET http://localhost:8080/comments/2

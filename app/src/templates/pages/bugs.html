@@ -46,6 +46,9 @@
             {{ .Hours }}
           </div>
         </div>
+        <div hx-get="/comments/{{ .BugId }}" hx-trigger="load">
+
+        </div>
       </li>
     {{end}}
   </ul>

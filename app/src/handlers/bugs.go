@@ -14,14 +14,14 @@ import (
 )
 
 type bug struct {
-	BugId        uint32    `db:"bug_id"`
+	BugId        uint64    `db:"bug_id"`
 	DateReported time.Time `db:"date_reported"`
 	Summary      *string   `db:"summary"`
 	Description  *string   `db:"description"`
 	Resolution   *string   `db:"resolution"`
-	ReportedBy   uint32    `db:"reported_by"`
-	AssignedTo   *uint32   `db:"assigned_to"`
-	VerifiedBy   *uint32   `db:"verified_by"`
+	ReportedBy   uint64    `db:"reported_by"`
+	AssignedTo   *uint64   `db:"assigned_to"`
+	VerifiedBy   *uint64   `db:"verified_by"`
 	Status       string    `db:"status"`
 	Priority     *string   `db:"priority"`
 	Hours        *float64  `db:"hours"`

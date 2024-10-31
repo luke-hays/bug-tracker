@@ -32,7 +32,7 @@ func Authenticator(dbContext *db.DatabaseContext) mux.MiddlewareFunc {
 					sessionCookie.Value,
 				)
 
-				var accountId uint32
+				var accountId uint64
 
 				scanErr := session.Scan(&accountId)
 
