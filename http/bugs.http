@@ -1,0 +1,17 @@
+# Cookie header is set to be remembered by gttp client settings 
+
+###
+# Get all bugs
+GET http://localhost:8080/bugs
+
+###
+# Get a bug
+GET http://localhost:8080/bugs/1
+
+###
+# Create a bug
+# Basic Creation
+POST http://localhost:8080/bugs?summary=this%20is%20a%20test&reported_by=1
+
+###
+# Update a bug

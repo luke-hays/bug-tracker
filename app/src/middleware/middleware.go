@@ -1,9 +1,13 @@
 package middleware
 
 import (
+	"app/src/db"
 	helpers "app/src/utils"
+	"context"
 	"fmt"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 func Logger(next http.Handler) http.Handler {
@@ -13,14 +17,41 @@ func Logger(next http.Handler) http.Handler {
 	})
 }
 
-func Authenticator(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if helpers.RequestHasValidSession(r) {
-			// If the cookie is missing, redirect to /signin
-			http.Redirect(w, r, "/signin", http.StatusSeeOther)
-			return
-		}
+func Authenticator(dbContext *db.DatabaseContext) mux.MiddlewareFunc {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			sessionCookie, err := r.Cookie("session")
 
-		next.ServeHTTP(w, r)
-	})
+			// fmt.Printf("session cookie %s\n", sessionCookie.Value)
+
+			if err == nil && sessionCookie != nil {
+				// Need to check that the session exists and is not expired
+				session := dbContext.Connection.QueryRow(
+					context.Background(),
+					"SELECT account_id FROM Sessions WHERE session_id = $1;",
+					sessionCookie.Value,
+				)
+
+				var accountId uint64
+
+				scanErr := session.Scan(&accountId)
+
+				if scanErr != nil {
+					fmt.Printf("%s\n", scanErr.Error())
+					http.Redirect(w, r, "/signin", http.StatusSeeOther)
+					return
+				}
+
+				key := helpers.AccountIdKey("account_id")
+				ctx := context.WithValue(r.Context(), key, accountId)
+				r = r.WithContext(ctx)
+			} else {
+				fmt.Printf("%s\n", err.Error())
+				http.Redirect(w, r, "/signin", http.StatusSeeOther)
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		})
+	}
 }

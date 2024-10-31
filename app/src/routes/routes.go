@@ -12,7 +12,7 @@ import (
 func registerSecureRoutes(router *mux.Router, dbContext *db.DatabaseContext) {
 	secureRoutes := router.NewRoute().Subrouter()
 
-	secureRoutes.Use(middleware.Authenticator)
+	secureRoutes.Use(middleware.Authenticator(dbContext))
 
 	secureRoutes.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		handlers.HomeHandler(w, r, dbContext)
@@ -27,12 +27,24 @@ func registerSecureRoutes(router *mux.Router, dbContext *db.DatabaseContext) {
 	}).Methods("POST")
 
 	secureRoutes.HandleFunc("/bugs/{id}", func(w http.ResponseWriter, r *http.Request) {
-		handlers.GetBug(w, r, dbContext)
+		vars := mux.Vars(r)
+		bugId := vars["id"]
+		handlers.GetBug(w, r, dbContext, bugId)
 	}).Methods("GET")
 
 	secureRoutes.HandleFunc("/bugs/{id}", func(w http.ResponseWriter, r *http.Request) {
 		handlers.UpdateBug(w, r, dbContext)
 	}).Methods("PUT")
+
+	secureRoutes.HandleFunc("/comments", func(w http.ResponseWriter, r *http.Request) {
+		handlers.CreateComment(w, r, dbContext)
+	}).Methods("POST")
+
+	secureRoutes.HandleFunc("/comments/{id}", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		bugId := vars["id"]
+		handlers.GetComments(w, r, dbContext, bugId)
+	}).Methods("GET")
 }
 
 func registerPublicRoutes(router *mux.Router, dbContext *db.DatabaseContext) {
