@@ -43,7 +43,7 @@ func GenerateBase64RandomId(byteNum int) (string, error) {
 }
 
 func WriteAndLogHeaderStatus(w http.ResponseWriter, status int, message string) {
-	fmt.Println(message)
+	fmt.Printf("%s\n", message)
 	w.WriteHeader(status)
 }
 

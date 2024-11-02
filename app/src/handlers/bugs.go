@@ -5,7 +5,6 @@ import (
 	helpers "app/src/utils"
 	"context"
 	"encoding/json"
-	"fmt"
 	"html/template"
 	"net/http"
 	"time"
@@ -28,6 +27,8 @@ type bug struct {
 }
 
 func CreateBug(w http.ResponseWriter, r *http.Request, dbContext *db.DatabaseContext) {
+	// TODO remove this check along with the account id retrieval
+	// Middleware can handle this now
 	sessionId, err := r.Cookie("session")
 
 	if err != nil {
@@ -81,10 +82,10 @@ func CreateBug(w http.ResponseWriter, r *http.Request, dbContext *db.DatabaseCon
 }
 
 func UpdateBug(w http.ResponseWriter, r *http.Request, dbContext *db.DatabaseContext) {
-	err := r.ParseForm()
+	parseFormErr := r.ParseForm()
 
-	if err != nil {
-		helpers.WriteAndLogHeaderStatus(w, http.StatusInternalServerError, "Error parsing form data")
+	if parseFormErr != nil {
+		helpers.WriteAndLogHeaderStatus(w, http.StatusBadRequest, parseFormErr.Error())
 		return
 	}
 
@@ -106,7 +107,7 @@ func UpdateBug(w http.ResponseWriter, r *http.Request, dbContext *db.DatabaseCon
 	transactionErr := helpers.RunTransaction(dbContext, []*helpers.ParameterizedQuery{&updateBug})
 
 	if transactionErr != nil {
-		helpers.WriteAndLogHeaderStatus(w, http.StatusInternalServerError, "Error updating bug")
+		helpers.WriteAndLogHeaderStatus(w, http.StatusInternalServerError, transactionErr.Error())
 		return
 	}
 
@@ -114,18 +115,18 @@ func UpdateBug(w http.ResponseWriter, r *http.Request, dbContext *db.DatabaseCon
 }
 
 func GetBugs(w http.ResponseWriter, r *http.Request, dbContext *db.DatabaseContext) {
-	rows, err := dbContext.Connection.Query(context.Background(), "SELECT * FROM Bugs")
+	// TODO implement pagination
+	bugRecords, queryBugRecordsErr := dbContext.Connection.Query(context.Background(), "SELECT * FROM Bugs")
 
-	if err != nil {
-		helpers.WriteAndLogHeaderStatus(w, http.StatusInternalServerError, "Error querying bugs")
+	if queryBugRecordsErr != nil {
+		helpers.WriteAndLogHeaderStatus(w, http.StatusInternalServerError, queryBugRecordsErr.Error())
 		return
 	}
 
-	bugs, collectErr := pgx.CollectRows(rows, pgx.RowToStructByName[bug])
+	bugs, collectRecordsErr := pgx.CollectRows(bugRecords, pgx.RowToStructByName[bug])
 
-	if collectErr != nil {
-		fmt.Printf("%s\n", collectErr.Error())
-		helpers.WriteAndLogHeaderStatus(w, http.StatusInternalServerError, "Unable to collect rows")
+	if collectRecordsErr != nil {
+		helpers.WriteAndLogHeaderStatus(w, http.StatusInternalServerError, collectRecordsErr.Error())
 		return
 	}
 
@@ -134,28 +135,25 @@ func GetBugs(w http.ResponseWriter, r *http.Request, dbContext *db.DatabaseConte
 }
 
 func GetBug(w http.ResponseWriter, r *http.Request, dbContext *db.DatabaseContext, bugId string) {
-	// Get specific bug by id
-	fmt.Printf("%s\n", bugId)
-	rows, queryErr := dbContext.Connection.Query(context.Background(), "SELECT * FROM Bugs WHERE bug_id = $1", bugId)
+	rows, queryBugErr := dbContext.Connection.Query(context.Background(), "SELECT * FROM Bugs WHERE bug_id = $1", bugId)
 
-	if queryErr != nil {
-		fmt.Printf("%s\n", queryErr.Error())
-		helpers.WriteAndLogHeaderStatus(w, http.StatusNotFound, "Unable to query for bug")
+	if queryBugErr != nil {
+		helpers.WriteAndLogHeaderStatus(w, http.StatusNotFound, queryBugErr.Error())
 		return
 	}
 
-	bugRecord, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[bug])
+	bugRecord, collectRecordErr := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[bug])
 
-	if err != nil {
-		fmt.Printf("%s\n", err.Error())
-		helpers.WriteAndLogHeaderStatus(w, http.StatusNotFound, "Unable to find bug")
+	if collectRecordErr != nil {
+		// TODO this could technically be a not found, or duplicate id issue
+		helpers.WriteAndLogHeaderStatus(w, http.StatusNotFound, collectRecordErr.Error())
 		return
 	}
 
 	encodedBug, encodingErr := json.Marshal(bugRecord)
 
 	if encodingErr != nil {
-		helpers.WriteAndLogHeaderStatus(w, http.StatusInternalServerError, "Unable to encode bugs")
+		helpers.WriteAndLogHeaderStatus(w, http.StatusInternalServerError, encodingErr.Error())
 		return
 	}
 

@@ -25,28 +25,25 @@ func CreateComment(w http.ResponseWriter, r *http.Request, dbContext *db.Databas
 	parseFormErr := r.ParseForm()
 
 	if parseFormErr != nil {
-		helpers.WriteAndLogHeaderStatus(w, http.StatusBadRequest, "Unable to parse form")
+		helpers.WriteAndLogHeaderStatus(w, http.StatusBadRequest, parseFormErr.Error())
 		return
 	}
 
+	// TODO make this a constant or maybe helper
 	key := helpers.AccountIdKey("account_id")
 	accountId := r.Context().Value(key)
-
-	fmt.Printf("accountId - %d\n", accountId)
 
 	bugId := r.FormValue("bug_id")
 	author := accountId
 	commentDate := time.Now()
 	comment := r.FormValue("comment")
 
-	bugIdNum, convErr := strconv.Atoi(bugId)
+	bugIdNum, atoiConvErr := strconv.Atoi(bugId)
 
-	if convErr != nil {
-		helpers.WriteAndLogHeaderStatus(w, http.StatusBadRequest, "Unable to parse bug id")
+	if atoiConvErr != nil {
+		helpers.WriteAndLogHeaderStatus(w, http.StatusBadRequest, atoiConvErr.Error())
 		return
 	}
-
-	fmt.Printf("%d, %d, %s, %s\n", bugIdNum, author, commentDate, comment)
 
 	insertComment := helpers.ParameterizedQuery{
 		Sql:    "INSERT INTO Comments (bug_id, author, comment_date, comment) VALUES ($1, $2, $3, $4);",
@@ -59,7 +56,7 @@ func CreateComment(w http.ResponseWriter, r *http.Request, dbContext *db.Databas
 	)
 
 	if transactionErr != nil {
-		helpers.WriteAndLogHeaderStatus(w, http.StatusInternalServerError, "Unable to commit transaction for inserting a new comment")
+		helpers.WriteAndLogHeaderStatus(w, http.StatusInternalServerError, transactionErr.Error())
 		return
 	}
 
@@ -71,15 +68,14 @@ func GetComments(w http.ResponseWriter, r *http.Request, dbContext *db.DatabaseC
 
 	if queryErr != nil {
 		fmt.Printf("%s\n", queryErr.Error())
-		helpers.WriteAndLogHeaderStatus(w, http.StatusNotFound, "Unable to query for comments")
+		helpers.WriteAndLogHeaderStatus(w, http.StatusNotFound, queryErr.Error())
 		return
 	}
 
 	bugComments, collectErr := pgx.CollectRows(rows, pgx.RowToStructByName[comments])
 
 	if collectErr != nil {
-		fmt.Printf("%s\n", collectErr.Error())
-		helpers.WriteAndLogHeaderStatus(w, http.StatusInternalServerError, "Unable to collect rows")
+		helpers.WriteAndLogHeaderStatus(w, http.StatusInternalServerError, collectErr.Error())
 		return
 	}
 
