@@ -22,10 +22,8 @@ func Authenticator(dbContext *db.DatabaseContext) mux.MiddlewareFunc {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			sessionCookie, err := r.Cookie("session")
 
-			// fmt.Printf("session cookie %s\n", sessionCookie.Value)
-
 			if err == nil && sessionCookie != nil {
-				// Need to check that the session exists and is not expired
+				// TODO Check Expiration Date
 				session := dbContext.Connection.QueryRow(
 					context.Background(),
 					"SELECT account_id FROM Sessions WHERE session_id = $1;",
@@ -37,7 +35,7 @@ func Authenticator(dbContext *db.DatabaseContext) mux.MiddlewareFunc {
 				scanErr := session.Scan(&accountId)
 
 				if scanErr != nil {
-					fmt.Printf("%s\n", scanErr.Error())
+					fmt.Printf("%v\n", scanErr)
 					http.Redirect(w, r, "/signin", http.StatusSeeOther)
 					return
 				}
@@ -46,7 +44,7 @@ func Authenticator(dbContext *db.DatabaseContext) mux.MiddlewareFunc {
 				ctx := context.WithValue(r.Context(), key, accountId)
 				r = r.WithContext(ctx)
 			} else {
-				fmt.Printf("%s\n", err.Error())
+				fmt.Printf("%v\n", err)
 				http.Redirect(w, r, "/signin", http.StatusSeeOther)
 				return
 			}

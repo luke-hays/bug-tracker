@@ -13,9 +13,7 @@ type DatabaseContext struct {
 }
 
 func Init() (*DatabaseContext, error) {
-	dbUrl := os.Getenv("DATABASE_URL")
-
-	conn, err := pgxpool.New(context.Background(), dbUrl)
+	conn, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
 
 	if err != nil {
 		return nil, err

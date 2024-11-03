@@ -15,9 +15,11 @@ func registerSecureRoutes(router *mux.Router, dbContext *db.DatabaseContext) {
 	secureRoutes.Use(middleware.Authenticator(dbContext))
 
 	secureRoutes.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		// TODO Redirect to Bugs
 		handlers.HomeHandler(w, r, dbContext)
 	}).Methods("GET")
 
+	/***** Bug Routes *****/
 	secureRoutes.HandleFunc("/bugs", func(w http.ResponseWriter, r *http.Request) {
 		handlers.GetBugs(w, r, dbContext)
 	}).Methods("GET")
@@ -36,6 +38,7 @@ func registerSecureRoutes(router *mux.Router, dbContext *db.DatabaseContext) {
 		handlers.UpdateBug(w, r, dbContext)
 	}).Methods("PUT")
 
+	/***** Comment Routes *****/
 	secureRoutes.HandleFunc("/comments", func(w http.ResponseWriter, r *http.Request) {
 		handlers.CreateComment(w, r, dbContext)
 	}).Methods("POST")
@@ -52,6 +55,7 @@ func registerPublicRoutes(router *mux.Router, dbContext *db.DatabaseContext) {
 		handlers.AuthenticateHandler(w, r, dbContext)
 	}).Methods("POST")
 
+	// TODO Can we display a timeout message? Should we?
 	router.HandleFunc("/signin", func(w http.ResponseWriter, r *http.Request) {
 		handlers.SignInHandler(w, r)
 	}).Methods("GET")
