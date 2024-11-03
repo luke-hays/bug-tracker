@@ -1,57 +1,35 @@
 {{define "body"}}
-  <ul class="bugs">
-    {{ range . }}
-      <li class="bug">
-        <div>
-          <div>
-            {{ .Status }}
-            {{ .BugId }}
-            {{ .Summary }}
-          </div>
-          <div>
-            Date Reported: {{ .DateReported }}
-          </div>
-        </div>
-        <div>
-          <div>
-            Description:
-            {{ .Description }}
-          </div>
-          <div>
-            Resolution:
-            {{ .Resolution }}
-          </div>
-          <div>
-            <div>
-              Reported By:
-              {{ .ReportedBy }}
-            </div>
-            <div>
-              Assigned To:
-              {{ .AssignedTo }}
-            </div>
-            <div>
-              Verified By:
-              {{ .VerifiedBy }}
-            </div>
-          </div>
-        </div>
-        <div>      
-          <div>
-            Priority:
-            {{ .Priority }}
-          </div>    
-          <div>
-            Hours:
-            {{ .Hours }}
-          </div>
-        </div>
-        <div hx-get="/comments/{{ .BugId }}" hx-trigger="load">
-
-        </div>
-      </li>
-    {{end}}
-  </ul>
+  <div class="bugs-content">
+    <form class="add-bug__form" hx-post="/bugs" hx-target=".bugs" hx-swap="afterbegin">
+      <div>
+        <label for="summary">Summary</label>
+        <input id="summary" name="summary" maxlength="80" type="text"/>
+      </div>
+      <div>
+        <label for="description">Description</label>
+        <textarea id="description" name="description" maxlength="1000" rows="3" cols="30"></textarea>
+      </div>
+    
+      <div>
+        <label for="priority">Priority</label>
+        <input id="priority" name="priority" maxlength="20" type="text"/>
+      </div>
+      <div>
+        <label for="hours">Hours</label>
+        <input id="hours" name="hours" type="number"/>
+      </div>
+      <button>Add bug</button>
+    </form>
+    <ul class="bugs">
+      {{ range . }}
+        <li>
+          {{ with . }}
+            {{ template "bug-info" . }}
+          {{ end }}
+        </li>
+      {{end}}
+    </ul>
+  </div>
 {{end}}
 
 {{define "styles"}}

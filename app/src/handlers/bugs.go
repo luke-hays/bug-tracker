@@ -71,6 +71,7 @@ func CreateBug(w http.ResponseWriter, r *http.Request, dbContext *db.DatabaseCon
 		Params: []any{dateReported, summary, description, reportedBy, assignedTo, status, priority, hours},
 	}
 
+	// TODO It would be helpful to return things from this like ids
 	transactionErr := helpers.RunTransaction(dbContext, []*helpers.ParameterizedQuery{&insertNewBug})
 
 	if transactionErr != nil {
@@ -78,7 +79,10 @@ func CreateBug(w http.ResponseWriter, r *http.Request, dbContext *db.DatabaseCon
 		return
 	}
 
+	// TODO Add method to send select menu for users
 	w.WriteHeader(http.StatusCreated)
+	tmpl := template.Must(template.ParseFiles("src/components/bug-info.html"))
+	tmpl.ExecuteTemplate(w, "bug-info", &bug{})
 }
 
 func UpdateBug(w http.ResponseWriter, r *http.Request, dbContext *db.DatabaseContext) {
@@ -115,7 +119,7 @@ func UpdateBug(w http.ResponseWriter, r *http.Request, dbContext *db.DatabaseCon
 }
 
 func GetBugs(w http.ResponseWriter, r *http.Request, dbContext *db.DatabaseContext) {
-	// TODO implement pagination
+	// TODO implement pagination and sort
 	bugRecords, queryBugRecordsErr := dbContext.Connection.Query(context.Background(), "SELECT * FROM Bugs")
 
 	if queryBugRecordsErr != nil {
@@ -130,7 +134,12 @@ func GetBugs(w http.ResponseWriter, r *http.Request, dbContext *db.DatabaseConte
 		return
 	}
 
-	tmpl := template.Must(template.ParseFiles("src/templates/layouts/base.html", "src/templates/pages/bugs.html"))
+	tmpl := template.Must(template.ParseFiles(
+		"src/templates/layouts/base.html",
+		"src/templates/pages/bugs.html",
+		"src/components/bug-info.html",
+	))
+
 	tmpl.Execute(w, bugs)
 }
 
