@@ -119,7 +119,7 @@ func UpdateBug(w http.ResponseWriter, r *http.Request, dbContext *db.DatabaseCon
 }
 
 func GetBugs(w http.ResponseWriter, r *http.Request, dbContext *db.DatabaseContext) {
-	// TODO implement pagination and sort
+	// TODO implement pagination
 	// TODO Time isn't recorded
 	bugRecords, queryBugRecordsErr := dbContext.Connection.Query(context.Background(), "SELECT * FROM Bugs ORDER BY date_reported DESC, bug_id DESC")
 
