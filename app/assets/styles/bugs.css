@@ -3,6 +3,12 @@ body {
   justify-content: center;
 }
 
+.bugs-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
 .bugs {
   list-style: none;
   padding: 0;

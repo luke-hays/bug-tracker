@@ -1,7 +1,22 @@
-{{ range . }}
-  <div>
-    {{ .Author }}
-    {{ .CommentDate }}
-    {{ .Comment }}
+{{ $bugId := .BugId }}
+<div>
+  <div id="bug-{{ $bugId }}-comments">
+    {{ range .Comments }}
+      {{ with . }}
+        {{ template "bug-comment" . }}
+      {{ end }}
+    {{ end }}
   </div>
-{{ end }}
+  <form 
+    class="add-comment" 
+    hx-post="/comments/{{ $bugId }}" 
+    hx-target="#bug-{{ $bugId }}-comments"
+    hx-swap="beforeend"
+  >
+    <div>
+      <label for="comment">Comment:</label>
+      <textarea rows="3" cols="30" id="comment" name="comment" required minlength="1"></textarea>
+    </div>
+    <button>Add Comment</button>
+  </form>
+</div>

@@ -13,6 +13,12 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+type oneComment struct {
+	Author      uint64
+	CommentDate time.Time
+	Comment     string
+}
+
 type comments struct {
 	CommentId   uint64    `db:"comment_id"`
 	BugId       uint64    `db:"bug_id"`
@@ -21,7 +27,12 @@ type comments struct {
 	Comment     string    `db:"comment"`
 }
 
-func CreateComment(w http.ResponseWriter, r *http.Request, dbContext *db.DatabaseContext) {
+type bugCommentsPair struct {
+	BugId    string
+	Comments []comments
+}
+
+func CreateComment(w http.ResponseWriter, r *http.Request, dbContext *db.DatabaseContext, bugId string) {
 	parseFormErr := r.ParseForm()
 
 	if parseFormErr != nil {
@@ -33,8 +44,13 @@ func CreateComment(w http.ResponseWriter, r *http.Request, dbContext *db.Databas
 	key := helpers.AccountIdKey("account_id")
 	accountId := r.Context().Value(key)
 
-	bugId := r.FormValue("bug_id")
-	author := accountId
+	authorId, ok := accountId.(uint64)
+
+	if !ok {
+		helpers.WriteAndLogHeaderStatus(w, http.StatusInternalServerError, "Author ID is not an valid ID")
+		return
+	}
+
 	commentDate := time.Now()
 	comment := r.FormValue("comment")
 
@@ -47,7 +63,7 @@ func CreateComment(w http.ResponseWriter, r *http.Request, dbContext *db.Databas
 
 	insertComment := helpers.ParameterizedQuery{
 		Sql:    "INSERT INTO Comments (bug_id, author, comment_date, comment) VALUES ($1, $2, $3, $4);",
-		Params: []any{bugIdNum, author, commentDate, comment},
+		Params: []any{bugIdNum, authorId, commentDate, comment},
 	}
 
 	transactionErr := helpers.RunTransaction(
@@ -61,6 +77,8 @@ func CreateComment(w http.ResponseWriter, r *http.Request, dbContext *db.Databas
 	}
 
 	w.WriteHeader(http.StatusCreated)
+	tmpl := template.Must(template.ParseFiles("src/components/bug-comment.html"))
+	tmpl.ExecuteTemplate(w, "bug-comment", &oneComment{Author: authorId, CommentDate: commentDate, Comment: comment})
 }
 
 func GetComments(w http.ResponseWriter, r *http.Request, dbContext *db.DatabaseContext, bugId string) {
@@ -79,6 +97,6 @@ func GetComments(w http.ResponseWriter, r *http.Request, dbContext *db.DatabaseC
 		return
 	}
 
-	tmpl := template.Must(template.ParseFiles("src/components/bug-comments.html"))
-	tmpl.Execute(w, bugComments)
+	tmpl := template.Must(template.ParseFiles("src/components/bug-comments.html", "src/components/bug-comment.html"))
+	tmpl.Execute(w, &bugCommentsPair{BugId: bugId, Comments: bugComments})
 }
