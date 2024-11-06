@@ -1,7 +1,7 @@
 <form>
   <div>
     <label for="summary">Summary</label>
-    <input id="summary" name="summary" maxlength="80" type="text"/>
+    <input value="{{.Summary}}" id="summary" name="summary" maxlength="80" type="text"/>
   </div>
   <div>
     <label for="description">Description</label>
@@ -32,6 +32,7 @@
     <input id="hours" name="hours" type="number"/>
   </div>
   <button>Save</button>
+  <button>Cancel</button>
 </form>
 
 
