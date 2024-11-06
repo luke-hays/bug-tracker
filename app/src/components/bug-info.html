@@ -1,51 +1,54 @@
 {{ define "bug-info" }}
 <li class="bug">
-  <div>
+  <div class="bug-content" hx-swap="innerHTML">
     <div>
-      {{ .Status }}
-      {{ .BugId }}
-      {{ .Summary }}
-    </div>
-    <div>
-      Date Reported: {{ .DateReported }}
-    </div>
-  </div>
-  <div>
-    <div>
-      Description:
-      {{ .Description }}
-    </div>
-    <div>
-      Resolution:
-      {{ .Resolution }}
+      <button hx-get="/bugs/{{ .BugId }}" hx-target="closest .bug-content">Edit</button>
+      <div>
+        {{ .Status }}
+        {{ .BugId }}
+        {{ .Summary }}
+      </div>
+      <div>
+        Date Reported: {{ .DateReported }}
+      </div>
     </div>
     <div>
       <div>
-        Reported By:
-        {{ .ReportedBy }}
+        Description:
+        {{ .Description }}
       </div>
       <div>
-        Assigned To:
-        {{ .AssignedTo }}
+        Resolution:
+        {{ .Resolution }}
       </div>
       <div>
-        Verified By:
-        {{ .VerifiedBy }}
+        <div>
+          Reported By:
+          {{ .ReportedBy }}
+        </div>
+        <div>
+          Assigned To:
+          {{ .AssignedTo }}
+        </div>
+        <div>
+          Verified By:
+          {{ .VerifiedBy }}
+        </div>
       </div>
     </div>
-  </div>
-  <div>      
-    <div>
-      Priority:
-      {{ .Priority }}
-    </div>    
-    <div>
-      Hours:
-      {{ .Hours }}
+    <div>      
+      <div>
+        Priority:
+        {{ .Priority }}
+      </div>    
+      <div>
+        Hours:
+        {{ .Hours }}
+      </div>
     </div>
-  </div>
-  <div hx-get="/comments/{{ .BugId }}" hx-trigger="load">
-
+    <div hx-get="/comments/{{ .BugId }}" hx-trigger="load">
+  
+    </div>
   </div>
 </li>
 {{end}}
