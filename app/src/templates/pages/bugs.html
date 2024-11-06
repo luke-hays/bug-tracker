@@ -1,25 +1,6 @@
 {{define "body"}}
   <div class="bugs-content">
-    <form class="add-bug__form" hx-post="/bugs" hx-target=".bugs" hx-swap="afterbegin">
-      <div>
-        <label for="summary">Summary</label>
-        <input id="summary" name="summary" maxlength="80" type="text"/>
-      </div>
-      <div>
-        <label for="description">Description</label>
-        <textarea id="description" name="description" maxlength="1000" rows="3" cols="30"></textarea>
-      </div>
-    
-      <div>
-        <label for="priority">Priority</label>
-        <input id="priority" name="priority" maxlength="20" type="text"/>
-      </div>
-      <div>
-        <label for="hours">Hours</label>
-        <input id="hours" name="hours" type="number"/>
-      </div>
-      <button>Add bug</button>
-    </form>
+    <button>Create new bugs</button>
     <ul class="bugs">
       {{ range . }}
         <li>
